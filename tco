@@ -1,0 +1,124 @@
+#!/usr/bin/env python
+
+"""
+Runs Couchbase operator tests in an easy to use manner for developers
+"""
+
+import argparse
+import os
+import subprocess
+import tempfile
+import yaml
+
+
+# Suite aliases
+SUITES = {
+    'sanity': 'TestSanity',
+    'p0': 'TestP0',
+    'p1': 'TestP1',
+    'crd': 'TestCRDValidation',
+}
+
+# Hard coded paths relative to the repo
+DEPLOYMENT = '/example/deployment.yaml'
+CLUSTERS = '/test/e2e/resources/cluster_conf.yml'
+
+class TestRunner(object):
+    """
+    Runs tests based on the provided context
+    """
+
+    # pylint: disable=too-few-public-methods
+
+    def __init__(self, args):
+        self.args = args
+
+    def _gen_test_config(self):
+        """
+        Using CLI and static parameters create a test config file.
+        This is only useful for test suites.
+        """
+        config = {
+            'operator-image': self.args.image,
+            'namespace': self.args.namespace,
+            'deployment-spec': os.path.expanduser(self.args.repo + DEPLOYMENT),
+            # This should be dynamically generated can use AWS or something
+            'cluster-config': os.path.expanduser(self.args.repo + CLUSTERS),
+            'kube-config': [
+                {
+                    'name': 'BasicCluster',
+                    'config': os.path.expanduser(self.args.kubeconfig),
+                },
+            ],
+            'duration': 7,
+            'skip-tear-down': False,
+            'suite': SUITES[self.args.suite],
+            'kube-type': 'kubernetes',
+            'kube-version': '1.10.0-0',
+            'serviceAccountName': self.args.service_account,
+        }
+
+        temp = tempfile.NamedTemporaryFile()
+        temp.write(yaml.dump(config, default_flow_style=False))
+        temp.flush()
+        return temp
+
+    def _exec(self, cmd):
+        """
+        Execute a command with necessary environment variables etc
+        """
+        # Required for the suite to find cbopctl
+        os.environ['TESTDIR'] = os.path.expanduser(self.args.repo)
+        proc = subprocess.Popen(cmd, env=os.environ)
+        proc.communicate()
+
+    def run(self):
+        """
+        Run the requested test(s)
+        """
+        if self.args.suite:
+            test_config = self._gen_test_config()
+            cmd = [
+                'go', 'test', 'github.com/couchbase/couchbase-operator/test/e2e',
+                '-run', 'TestOperator',
+                '-v',
+                '-race',
+                '-timeout', '240m',
+                '-testconfig', test_config.name,
+            ]
+            self._exec(cmd)
+
+
+def main():
+    """
+    Parse command line arguments and run the relevant test type
+    """
+    parser = argparse.ArgumentParser()
+
+    # Generic arguments
+    parser.add_argument('-n', '--namespace', default='default')
+    parser.add_argument('-k', '--kubeconfig', default='~/.kube/config')
+    parser.add_argument('-a', '--service-account', default='default')
+    parser.add_argument('-i', '--image', default='couchbase/couchbase-operator:v1')
+    parser.add_argument('-r', '--repo')
+
+    # Required arguments
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-s', '--suite', choices=SUITES.keys())
+    group.add_argument('-t', '--test')
+
+    args = parser.parse_args()
+
+    # Load up static arguments from the file system and add to the cli ones
+    with open(os.environ['HOME'] + '/.tco/config') as config_file:
+        static_config = yaml.load(config_file.read())
+    for key, value in static_config.items():
+        setattr(args, key, value)
+
+    # Run the tests
+    runner = TestRunner(args)
+    return runner.run()
+
+
+if __name__ == '__main__':
+    main()
