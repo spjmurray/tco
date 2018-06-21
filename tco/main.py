@@ -162,10 +162,14 @@ def main():
     logging.basicConfig(stream=sys.stdout, level=log_level)
 
     # Load up static arguments from the file system and add to the cli ones
-    with open(os.environ['HOME'] + '/.tco/config') as config_file:
-        static_config = yaml.load(config_file.read())
-    for key, value in static_config.items():
-        setattr(args, key, value)
+    try:
+        with open(os.environ['HOME'] + '/.tco/config') as config_file:
+            static_config = yaml.load(config_file.read())
+    except IOError:
+        pass
+    else:
+        for key, value in static_config.items():
+            setattr(args, key, value)
 
     # Expand paths
     args_paths = [
