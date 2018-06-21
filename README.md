@@ -21,7 +21,3 @@ Simply specify a suite or individual test to run:
 
     $ tco --suite sanity
     $ tco --test TestRecoveryAfterOnePodFailureNoBucket
-
-## Issues
-
-Running an individual test is not yet possible.
