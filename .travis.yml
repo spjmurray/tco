@@ -7,3 +7,4 @@ install:
   - make install
 script:
   - pylint tco
+  - tco --help
