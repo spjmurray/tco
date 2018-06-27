@@ -23,7 +23,7 @@ SUITES = {
 
 # Hard coded paths relative to the repo
 DEPLOYMENT_PATH_REL = '/example/deployment.yaml'
-CLUSTERS_PATH_REL = '/test/e2e/resources/cluster_conf.yml'
+CLUSTERS_PATH_REL = '/test/e2e/resources/cluster_conf.yaml'
 SUITES_PATH_REL = '/test/e2e/resources/suites'
 
 class TestRunner(object):
@@ -95,7 +95,7 @@ class TestRunner(object):
         }
 
         # Should be configurable rather than hard coded
-        temp = tempfile.NamedTemporaryFile(suffix='.yml', dir=self.args.repo + SUITES_PATH_REL)
+        temp = tempfile.NamedTemporaryFile(suffix='.yaml', dir=self.args.repo + SUITES_PATH_REL)
         temp.write(self._yaml_encode(config))
         temp.flush()
         return temp
