@@ -65,6 +65,8 @@ class TestRunner(object):
             'kube-type': 'kubernetes',
             'kube-version': '1.10.0-0',
             'serviceAccountName': self.args.service_account,
+            'cbServerBaseImage': 'couchbase/server',
+            'cbServerImageVersion': 'enterprise-5.5.0',
         }
 
         temp = tempfile.NamedTemporaryFile()
@@ -85,11 +87,7 @@ class TestRunner(object):
                     'clusters': [
                         'BasicCluster',
                     ],
-                    'testcases': [
-                        {
-                            'name': self.args.test,
-                        },
-                    ],
+                    'testcases': [{'name': test} for test in self.args.test],
                 },
             ],
         }
@@ -153,7 +151,7 @@ def main():
     # Required arguments
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-s', '--suite', choices=SUITES.keys())
-    group.add_argument('-t', '--test')
+    group.add_argument('-t', '--test', action='append')
 
     args = parser.parse_args()
 
