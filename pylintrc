@@ -2,3 +2,4 @@
 disable=
   no-self-use,
   too-few-public-methods,
+  useless-object-inheritance,
