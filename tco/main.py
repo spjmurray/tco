@@ -19,6 +19,7 @@ SUITES = {
     'p0': 'TestP0',
     'p1': 'TestP1',
     'crd': 'TestCRDValidation',
+    'upgrade': 'TestUpgrade',
 }
 
 # Hard coded paths relative to the repo
@@ -168,6 +169,18 @@ def main():
     else:
         for key, value in static_config.items():
             setattr(args, key, value)
+
+    # Check that required arguments are set
+    required_args = [
+        'namespace',
+        'kubeconfig',
+        'service_account',
+        'image',
+        'repo',
+    ]
+    for required_arg in required_args:
+        if getattr(args, required_arg) == '':
+            logging.error('Required argument ' + required_arg + ' invalid')
 
     # Expand paths
     args_paths = [
