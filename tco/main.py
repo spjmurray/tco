@@ -180,7 +180,7 @@ def main():
     ]
     for required_arg in required_args:
         if getattr(args, required_arg) == '':
-            logging.error('Required argument ' + required_arg + ' invalid')
+            logging.error('Required argument %s unset', required_arg)
 
     # Expand paths
     args_paths = [
