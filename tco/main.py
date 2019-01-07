@@ -22,6 +22,15 @@ SUITES = {
     'upgrade': 'TestUpgrade',
 }
 
+# Default arguements
+DEFAULTS = {
+    'namespace': 'default',
+    'kubeconfig': '~/.kube/config',
+    'service-account': 'default',
+    'operator-image': 'couchbase/couchbase-operator:v1',
+    'admission-image': 'couchbase/couchbase-operator-admission:v1',
+}
+
 # Hard coded paths relative to the repo
 DEPLOYMENT_PATH_REL = '/example/deployment.yaml'
 CLUSTERS_PATH_REL = '/test/e2e/resources/cluster_conf.yaml'
@@ -50,6 +59,7 @@ class TestRunner(object):
         """
         config = {
             'operator-image': self.args.image,
+            'admission-controller-image': self.args.admission_controller_image,
             'namespace': self.args.namespace,
             'deployment-spec': self.args.repo + DEPLOYMENT_PATH_REL,
             # This should be dynamically generated can use AWS or something
@@ -69,6 +79,11 @@ class TestRunner(object):
             'cbServerBaseImage': 'couchbase/server',
             'cbServerImageVersion': 'enterprise-5.5.0',
         }
+
+        if self.args.docker_server:
+            config['docker-server'] = self.args.docker_server
+            config['docker-username'] = self.args.docker_username
+            config['docker-password'] = self.args.docker_password
 
         temp = tempfile.NamedTemporaryFile()
         temp.write(self._yaml_encode(config))
@@ -142,12 +157,16 @@ def main():
     parser = argparse.ArgumentParser()
 
     # Generic arguments
-    parser.add_argument('-n', '--namespace', default='default')
-    parser.add_argument('-k', '--kubeconfig', default='~/.kube/config')
-    parser.add_argument('-a', '--service-account', default='default')
-    parser.add_argument('-i', '--image', default='couchbase/couchbase-operator:v1')
+    parser.add_argument('-n', '--namespace', default=DEFAULTS['namespace'])
+    parser.add_argument('-k', '--kubeconfig', default=DEFAULTS['kubeconfig'])
+    parser.add_argument('-a', '--service-account', default=DEFAULTS['service-account'])
+    parser.add_argument('-i', '--image', default=DEFAULTS['operator-image'])
+    parser.add_argument('-I', '--admission-controller-image', default=DEFAULTS['admission-image'])
     parser.add_argument('-r', '--repo')
     parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('-S', '--docker-server')
+    parser.add_argument('-U', '--docker-username')
+    parser.add_argument('-P', '--docker-password')
 
     # Required arguments
     group = parser.add_mutually_exclusive_group(required=True)
@@ -181,6 +200,13 @@ def main():
     for required_arg in required_args:
         if getattr(args, required_arg) == '':
             logging.error('Required argument %s unset', required_arg)
+
+    # Check docker parameters are correctly set
+    if args.docker_server:
+        if not args.docker_username:
+            logging.error('Required arguments --docker-username unset')
+        if not args.docker_password:
+            logging.error('Required arguments --docker-password unset')
 
     # Expand paths
     args_paths = [
