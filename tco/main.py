@@ -52,6 +52,34 @@ class TestRunner(object):
         logging.debug(enc)
         return enc
 
+    def _gen_kube_config(self):
+        """
+        Create clusters that can be used (without modification) by the framework.
+        By default use whatever is in the kube config.  If contexts are specified
+        use them in the cluster configuration.  If too few are specified the last
+        defined is replicated.
+        """
+
+        template = [
+            {
+                'name': 'BasicCluster',
+                'config': self.args.kubeconfig,
+            },
+            {
+                'name': 'NewCluster1',
+                'config': self.args.kubeconfig,
+            },
+        ]
+
+        if self.args.context:
+            diff = len(template) - len(self.args.context)
+            if diff >= 1:
+                self.args.context += self.args.context[-1:] * diff
+            for index, config in enumerate(template, 0):
+                config['context'] = self.args.context[index]
+
+        return template
+
     def _gen_test_config(self, suite):
         """
         Using CLI and static parameters create a test config file.
@@ -64,12 +92,8 @@ class TestRunner(object):
             'deployment-spec': self.args.repo + DEPLOYMENT_PATH_REL,
             # This should be dynamically generated can use AWS or something
             'cluster-config': self.args.repo + CLUSTERS_PATH_REL,
-            'kube-config': [
-                {
-                    'name': 'BasicCluster',
-                    'config': self.args.kubeconfig,
-                },
-            ],
+            # The tests use either of these clusters as they are set up differently
+            'kube-config': self._gen_kube_config(),
             'duration': 7,
             'skip-tear-down': False,
             'suite': suite,
@@ -160,6 +184,7 @@ def main():
     # Generic arguments
     parser.add_argument('-n', '--namespace', default=DEFAULTS['namespace'])
     parser.add_argument('-k', '--kubeconfig', default=DEFAULTS['kubeconfig'])
+    parser.add_argument('-c', '--context', action='append')
     parser.add_argument('-a', '--service-account', default=DEFAULTS['service-account'])
     parser.add_argument('-i', '--image', default=DEFAULTS['operator-image'])
     parser.add_argument('-I', '--admission-controller-image', default=DEFAULTS['admission-image'])
