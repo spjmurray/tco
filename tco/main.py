@@ -78,6 +78,7 @@ class TestRunner(object):
             'serviceAccountName': self.args.service_account,
             'cbServerBaseImage': 'couchbase/server',
             'cbServerImageVersion': 'enterprise-5.5.0',
+            'cbServerImageVersionUpgrade': 'enterprise-6.0.0',
         }
 
         if self.args.docker_server:
