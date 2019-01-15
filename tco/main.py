@@ -29,6 +29,7 @@ DEFAULTS = {
     'service-account': 'default',
     'operator-image': 'couchbase/couchbase-operator:v1',
     'admission-image': 'couchbase/couchbase-operator-admission:v1',
+    'storage-class': 'default',
 }
 
 # Hard coded paths relative to the repo
@@ -103,6 +104,7 @@ class TestRunner(object):
             'cbServerBaseImage': 'couchbase/server',
             'cbServerImageVersion': 'enterprise-5.5.0',
             'cbServerImageVersionUpgrade': 'enterprise-6.0.0',
+            'StorageClassName': self.args.storage_class,
         }
 
         if self.args.docker_server:
@@ -193,6 +195,7 @@ def main():
     parser.add_argument('-S', '--docker-server')
     parser.add_argument('-U', '--docker-username')
     parser.add_argument('-P', '--docker-password')
+    parser.add_argument('-C', '--storage-class', default=DEFAULTS['storage-class'])
 
     # Required arguments
     group = parser.add_mutually_exclusive_group(required=True)
