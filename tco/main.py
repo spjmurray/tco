@@ -29,7 +29,7 @@ DEFAULTS = {
     'service-account': 'default',
     'operator-image': 'couchbase/couchbase-operator:v1',
     'admission-image': 'couchbase/couchbase-operator-admission:v1',
-    'storage-class': 'default',
+    'storage-class': 'standard',
 }
 
 # Hard coded paths relative to the repo
