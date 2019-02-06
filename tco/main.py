@@ -129,6 +129,7 @@ class TestRunner(object):
                     'name': 'Group1',
                     'clusters': [
                         'BasicCluster',
+                        'NewCluster1',
                     ],
                     'testcases': [{'name': test} for test in self.args.test],
                 },
