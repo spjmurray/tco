@@ -102,9 +102,10 @@ class TestRunner(object):
             'kube-version': '1.10.0-0',
             'serviceAccountName': self.args.service_account,
             'cbServerBaseImage': 'couchbase/server',
-            'cbServerImageVersion': 'enterprise-5.5.0',
+            'cbServerImageVersion': 'enterprise-5.5.3',
             'cbServerImageVersionUpgrade': 'enterprise-6.0.0',
             'StorageClassName': self.args.storage_class,
+            'collectLogsOnFailure': self.args.collect_logs,
         }
 
         if self.args.docker_server:
@@ -197,6 +198,7 @@ def main():
     parser.add_argument('-U', '--docker-username')
     parser.add_argument('-P', '--docker-password')
     parser.add_argument('-C', '--storage-class', default=DEFAULTS['storage-class'])
+    parser.add_argument('-l', '--collect-logs', action='store_true')
 
     # Required arguments
     group = parser.add_mutually_exclusive_group(required=True)
