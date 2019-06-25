@@ -101,9 +101,8 @@ class TestRunner(object):
             'kube-type': 'kubernetes',
             'kube-version': '1.10.0-0',
             'serviceAccountName': self.args.service_account,
-            'cbServerBaseImage': 'couchbase/server',
-            'cbServerImageVersion': 'enterprise-5.5.3',
-            'cbServerImageVersionUpgrade': 'enterprise-6.0.0',
+            'couchbase-server-image': 'couchbase/server:enterprise-5.5.3',
+            'couchbase-server-image-upgrade': 'couchbase/server:enterprise-6.0.1',
             'StorageClassName': self.args.storage_class,
             'collectLogsOnFailure': self.args.collect_logs,
         }
