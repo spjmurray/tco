@@ -30,6 +30,8 @@ DEFAULTS = {
     'operator-image': 'couchbase/couchbase-operator:v1',
     'admission-image': 'couchbase/couchbase-operator-admission:v1',
     'storage-class': 'standard',
+    'server-image': 'couchbase/server:enterprise-6.0.0',
+    'server-upgrade-image': 'couchbase/server:enterprise-6.0.1',
 }
 
 # Hard coded paths relative to the repo
@@ -101,8 +103,8 @@ class TestRunner(object):
             'kube-type': 'kubernetes',
             'kube-version': '1.10.0-0',
             'serviceAccountName': self.args.service_account,
-            'couchbase-server-image': 'couchbase/server:enterprise-5.5.3',
-            'couchbase-server-image-upgrade': 'couchbase/server:enterprise-6.0.1',
+            'couchbase-server-image': self.args.server_image,
+            'couchbase-server-image-upgrade': self.args.server_upgrade_image,
             'StorageClassName': self.args.storage_class,
             'collectLogsOnFailure': self.args.collect_logs,
         }
@@ -198,6 +200,8 @@ def main():
     parser.add_argument('-P', '--docker-password')
     parser.add_argument('-C', '--storage-class', default=DEFAULTS['storage-class'])
     parser.add_argument('-l', '--collect-logs', action='store_true')
+    parser.add_argument('--server-image', default=DEFAULTS['server-image'])
+    parser.add_argument('--server-upgrade-image', default=DEFAULTS['server-upgrade-image'])
 
     # Required arguments
     group = parser.add_mutually_exclusive_group(required=True)
