@@ -217,7 +217,7 @@ def main():
     # Load up static arguments from the file system and add to the cli ones
     try:
         with open(os.environ['HOME'] + '/.tco/config') as config_file:
-            static_config = yaml.load(config_file.read())
+            static_config = yaml.load(config_file.read(), Loader=yaml.SafeLoader)
     except IOError:
         pass
     else:
