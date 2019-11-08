@@ -30,8 +30,8 @@ DEFAULTS = {
     'operator-image': 'couchbase/couchbase-operator:v1',
     'admission-image': 'couchbase/couchbase-operator-admission:v1',
     'storage-class': 'standard',
-    'server-image': 'couchbase/server:enterprise-6.0.0',
-    'server-upgrade-image': 'couchbase/server:enterprise-6.0.1',
+    'server-image': 'couchbase/server:enterprise-6.0.3',
+    'server-upgrade-image': 'couchbase/server:enterprise-6.5.0-beta2',
 }
 
 # Hard coded paths relative to the repo
