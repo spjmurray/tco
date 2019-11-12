@@ -174,7 +174,7 @@ class TestRunner(object):
             '-run', 'TestOperator',
             '-v',
             '-race',
-            '-timeout', '240m',
+            '-timeout', '16h',
             '-testconfig', test_config.name,
         ]
         self._exec(cmd)
