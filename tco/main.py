@@ -31,7 +31,8 @@ DEFAULTS = {
     'admission-image': 'couchbase/couchbase-operator-admission:v1',
     'storage-class': 'standard',
     'server-image': 'couchbase/server:enterprise-6.0.3',
-    'server-upgrade-image': 'couchbase/server:enterprise-6.5.0-beta2',
+    'server-upgrade-image': 'couchbase/server:enterprise-6.5.0',
+    'sync-gateway-image': 'couchbase/sync-gateway:2.7.0-enterprise'
 }
 
 # Hard coded paths relative to the repo
@@ -67,10 +68,12 @@ class TestRunner(object):
             {
                 'name': 'BasicCluster',
                 'config': self.args.kubeconfig,
+                'namespace': 'default',
             },
             {
                 'name': 'NewCluster1',
                 'config': self.args.kubeconfig,
+                'namespace': 'remote',
             },
         ]
 
@@ -105,6 +108,7 @@ class TestRunner(object):
             'serviceAccountName': self.args.service_account,
             'couchbase-server-image': self.args.server_image,
             'couchbase-server-image-upgrade': self.args.server_upgrade_image,
+            'sync-gateway-image': self.args.sync_gateway_image,
             'StorageClassName': self.args.storage_class,
             'collectLogsOnFailure': self.args.collect_logs,
         }
@@ -202,6 +206,7 @@ def main():
     parser.add_argument('-l', '--collect-logs', action='store_true')
     parser.add_argument('--server-image', default=DEFAULTS['server-image'])
     parser.add_argument('--server-upgrade-image', default=DEFAULTS['server-upgrade-image'])
+    parser.add_argument('--sync-gateway-image', default=DEFAULTS['sync-gateway-image'])
 
     # Required arguments
     group = parser.add_mutually_exclusive_group(required=True)
