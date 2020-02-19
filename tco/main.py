@@ -30,8 +30,8 @@ DEFAULTS = {
     'operator-image': 'couchbase/couchbase-operator:v1',
     'admission-image': 'couchbase/couchbase-operator-admission:v1',
     'storage-class': 'standard',
-    'server-image': 'couchbase/server:enterprise-6.0.3',
-    'server-upgrade-image': 'couchbase/server:enterprise-6.5.0',
+    'server-image': 'couchbase/server:6.0.3',
+    'server-upgrade-image': 'couchbase/server:6.5.0',
     'sync-gateway-image': 'couchbase/sync-gateway:2.7.0-enterprise'
 }
 
