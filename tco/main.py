@@ -20,6 +20,8 @@ SUITES = {
     'p1': 'TestP1',
     'crd': 'TestCRDValidation',
     'upgrade': 'TestUpgrade',
+    'rbac': 'TestRBAC',
+    'ldap': 'TestLDAP',
 }
 
 # Default arguements
