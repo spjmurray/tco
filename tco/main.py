@@ -121,7 +121,7 @@ class TestRunner(object):
             config['docker-password'] = self.args.docker_password
 
         temp = tempfile.NamedTemporaryFile()
-        temp.write(self._yaml_encode(config))
+        temp.write(self._yaml_encode(config).encode())
         temp.flush()
         return temp
 
@@ -146,7 +146,7 @@ class TestRunner(object):
 
         # Should be configurable rather than hard coded
         temp = tempfile.NamedTemporaryFile(suffix='.yaml', dir=self.args.repo + SUITES_PATH_REL)
-        temp.write(self._yaml_encode(config))
+        temp.write(self._yaml_encode(config).encode())
         temp.flush()
         return temp
 
@@ -166,6 +166,7 @@ class TestRunner(object):
 
         # Select the suite from our list of aliases or if a specific
         # test is requested then create a temporary suite
+        suite_config = None
         if self.args.suite:
             suite_name = SUITES[self.args.suite]
         else:
@@ -184,6 +185,11 @@ class TestRunner(object):
             '-testconfig', test_config.name,
         ]
         self._exec(cmd)
+
+        # Keep alive until we are done.
+        test_config.close()
+        if suite_config:
+            suite_config.close()
 
 
 def main():

@@ -3,11 +3,11 @@ all: install
 
 .PHONY: requirements
 requirements:
-	pip install -r requirements.txt
+	pip3 install -r requirements.txt
 
 .PHONY: install
 install:
-	pip install --upgrade .
+	pip3 install --upgrade .
 
 .PHONY: clean
 clean:
