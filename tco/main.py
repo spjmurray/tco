@@ -32,8 +32,8 @@ DEFAULTS = {
     'operator-image': 'couchbase/couchbase-operator:v1',
     'admission-image': 'couchbase/couchbase-operator-admission:v1',
     'storage-class': 'standard',
-    'server-image': 'couchbase/server:6.0.4',
-    'server-upgrade-image': 'couchbase/server:6.5.0',
+    'server-image': 'couchbase/server:6.5.0',
+    'server-upgrade-image': 'couchbase/server:6.5.1',
     'sync-gateway-image': 'couchbase/sync-gateway:2.7.0-enterprise'
 }
 
@@ -66,64 +66,18 @@ class TestRunner(object):
         defined is replicated.
         """
 
-        template = [
-            {
-                'name': 'BasicCluster',
-                'config': self.args.kubeconfig,
-                'namespace': 'default',
-            },
-            {
-                'name': 'NewCluster1',
-                'config': self.args.kubeconfig,
-                'namespace': 'remote',
-            },
+        args = [
+            '-kubeconfig1', self.args.kubeconfig,
+            '-namespace1', 'default',
+            '-kubeconfig2', self.args.kubeconfig,
+            '-namespace2', 'remote',
         ]
 
         if self.args.context:
-            diff = len(template) - len(self.args.context)
-            if diff >= 1:
-                self.args.context += self.args.context[-1:] * diff
-            for index, config in enumerate(template, 0):
-                config['context'] = self.args.context[index]
+            args.extend(['-context1', self.args.context[0]])
+            args.extend(['-context2', self.args.context[1]])
 
-        return template
-
-    def _gen_test_config(self, suite):
-        """
-        Using CLI and static parameters create a test config file.
-        This is only useful for test suites.
-        """
-        config = {
-            'operator-image': self.args.image,
-            'admission-controller-image': self.args.admission_controller_image,
-            'namespace': self.args.namespace,
-            'deployment-spec': self.args.repo + DEPLOYMENT_PATH_REL,
-            # This should be dynamically generated can use AWS or something
-            'cluster-config': self.args.repo + CLUSTERS_PATH_REL,
-            # The tests use either of these clusters as they are set up differently
-            'kube-config': self._gen_kube_config(),
-            'duration': 7,
-            'skip-tear-down': False,
-            'suite': suite,
-            'kube-type': 'kubernetes',
-            'kube-version': '1.10.0-0',
-            'serviceAccountName': self.args.service_account,
-            'couchbase-server-image': self.args.server_image,
-            'couchbase-server-image-upgrade': self.args.server_upgrade_image,
-            'sync-gateway-image': self.args.sync_gateway_image,
-            'StorageClassName': self.args.storage_class,
-            'collectLogsOnFailure': self.args.collect_logs,
-        }
-
-        if self.args.docker_server:
-            config['docker-server'] = self.args.docker_server
-            config['docker-username'] = self.args.docker_username
-            config['docker-password'] = self.args.docker_password
-
-        temp = tempfile.NamedTemporaryFile()
-        temp.write(self._yaml_encode(config).encode())
-        temp.flush()
-        return temp
+        return args
 
     def _get_suite_config(self):
         """
@@ -175,19 +129,34 @@ class TestRunner(object):
             suite_name, _ = os.path.splitext(filename)
 
         # Generate the test configuration and run the test
-        test_config = self._gen_test_config(suite_name)
         cmd = [
             'go', 'test', 'github.com/couchbase/couchbase-operator/test/e2e',
             '-run', 'TestOperator',
             '-v',
             '-race',
             '-timeout', '16h',
-            '-testconfig', test_config.name,
+            '-operator-image', self.args.image,
+            '-admission-image', self.args.admission_controller_image,
+            '-server-image', self.args.server_image,
+            '-server-image-upgrade', self.args.server_upgrade_image,
+            '-mobile-image', self.args.sync_gateway_image,
+            '-storage-class', self.args.storage_class,
+            '-suite', suite_name,
         ]
+
+        cmd.extend(self._gen_kube_config())
+
+        if self.args.collect_logs:
+            cmd.append('-collect-logs')
+
+        if self.args.docker_server:
+            cmd.extend(['-docker-server', self.args.docker_server])
+            cmd.extend(['-docker-username', self.args.docker_username])
+            cmd.extend(['-docker-password', self.args.docker_password])
+
         self._exec(cmd)
 
         # Keep alive until we are done.
-        test_config.close()
         if suite_config:
             suite_config.close()
 
